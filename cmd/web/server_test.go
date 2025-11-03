@@ -63,17 +63,14 @@ func TestStoreWins(t *testing.T) {
 		nil,
 		nil,
 	}
-	server := NewPlayerServer(&store)
+	server := newTestServer(t, NewPlayerServer(&store))
+	defer server.Close()
 
 	t.Run("it records wins on POST", func(t *testing.T) {
 		player := "Moka"
 
-		request := newPostWinRequest(player)
-		response := httptest.NewRecorder()
-
-		server.ServeHTTP(response, request)
-
-		assertStatus(t, response.Code, http.StatusAccepted)
+		statusCode := server.recordWin(t, player)
+		assertStatus(t, statusCode, http.StatusAccepted)
 
 		if len(store.winCalls) != 1 {
 			t.Errorf("got %d calls to RecordWin; want 1", len(store.winCalls))
