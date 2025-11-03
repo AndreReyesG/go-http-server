@@ -63,6 +63,19 @@ func (ts *testServer) getPlayerScore(t *testing.T, name string) (int, string) {
 	return rs.StatusCode, string(body)
 }
 
+// Implement a recordWin() method for sending POST request to the test server.
+func (ts *testServer) recordWin(t *testing.T, name string) int {
+	req, _ := http.NewRequest(http.MethodPost, fmt.Sprintf("%s/players/%s", ts.URL, name), nil)
+
+	res, err := ts.Client().Do(req)
+	if err != nil {
+		// TODO: Do better error message.
+		t.Fatal(err)
+	}
+
+	return res.StatusCode
+}
+
 func getLeagueFromResponse(t testing.TB, body io.Reader) (league []Player) {
 	t.Helper()
 
