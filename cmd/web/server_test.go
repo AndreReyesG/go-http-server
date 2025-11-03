@@ -15,7 +15,8 @@ func TestGETPlayers(t *testing.T) {
 		nil,
 		nil,
 	}
-	server := NewPlayerServer(&store)
+	server := newTestServer(t, NewPlayerServer(&store))
+	defer server.Close()
 
 	// Create a slice of anonymous structs containing the test case name,
 	// player name, expected HTTP status code, and expected score.
@@ -48,13 +49,10 @@ func TestGETPlayers(t *testing.T) {
 	// Loop over the test cases.
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			request := newGetScoreRequest(tt.player)
-			response := httptest.NewRecorder()
+			statusCode, body := server.getPlayerScore(t, tt.player)
 
-			server.ServeHTTP(response, request)
-
-			assertStatus(t, response.Code, tt.expectedHTTPStatus)
-			assertResponseBody(t, response.Body.String(), tt.expectedScore)
+			assertStatus(t, statusCode, tt.expectedHTTPStatus)
+			assertResponseBody(t, body, tt.expectedScore)
 		})
 	}
 }
@@ -67,7 +65,7 @@ func TestStoreWins(t *testing.T) {
 	}
 	server := NewPlayerServer(&store)
 
-	t.Run("it records wins whe POST", func(t *testing.T) {
+	t.Run("it records wins on POST", func(t *testing.T) {
 		player := "Moka"
 
 		request := newPostWinRequest(player)
