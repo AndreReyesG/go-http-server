@@ -26,7 +26,7 @@ func NewPlayerServer(store PlayerStore) *PlayerServer {
 	router := http.NewServeMux()
 	router.Handle("GET /league", http.HandlerFunc(p.leagueHandler))
 	router.Handle("GET /players/{player}", http.HandlerFunc(p.showScore))
-	router.Handle("POST /players/", http.HandlerFunc(p.processWin))
+	router.Handle("POST /players/{player}", http.HandlerFunc(p.processWin))
 
 	p.Handler = router
 
