@@ -1,6 +1,7 @@
 package main
 
 import (
+	"bytes"
 	"encoding/json"
 	"fmt"
 	"io"
@@ -29,6 +30,39 @@ func (s *StubPlayerStore) GetLeague() []Player {
 	return s.league
 }
 
+// Define a custom testServer type which embeds an httptest.Server instance.
+type testServer struct {
+	*httptest.Server
+}
+
+// Create a newTestServer helper which initializes and returns a new instance
+// of our custom testServer type.
+func newTestServer(t *testing.T, h http.Handler) *testServer {
+	ts := httptest.NewServer(h)
+	return &testServer{ts}
+}
+
+// Implement a getPlayerScore() method on our custom testServer type. This
+// makes a GET request to a given url path using the test server client, and
+// returns the response status code and body.
+func (ts *testServer) getPlayerScore(t *testing.T, name string) (int, string) {
+	rs, err := ts.Client().Get(ts.URL + fmt.Sprintf("/players/%s", name))
+	if err != nil {
+		// TODO: Do better error message.
+		t.Fatal(err)
+	}
+
+	defer rs.Body.Close()
+	body, err := io.ReadAll(rs.Body)
+	if err != nil {
+		// TODO: Do better error message.
+		t.Fatal(err)
+	}
+	body = bytes.TrimSpace(body)
+
+	return rs.StatusCode, string(body)
+}
+
 func getLeagueFromResponse(t testing.TB, body io.Reader) (league []Player) {
 	t.Helper()
 
@@ -41,13 +75,9 @@ func getLeagueFromResponse(t testing.TB, body io.Reader) (league []Player) {
 	return
 }
 
+// Requests
 func newLeagueRequest() *http.Request {
 	req, _ := http.NewRequest(http.MethodGet, "/league", nil)
-	return req
-}
-
-func newGetScoreRequest(name string) *http.Request {
-	req, _ := http.NewRequest(http.MethodGet, fmt.Sprintf("/players/%s", name), nil)
 	return req
 }
 
@@ -56,6 +86,7 @@ func newPostWinRequest(name string) *http.Request {
 	return req
 }
 
+// Assertions
 func assertResponseBody(t testing.TB, got, want string) {
 	t.Helper()
 	if got != want {
