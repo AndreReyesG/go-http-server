@@ -76,6 +76,11 @@ func getLeagueFromResponse(t testing.TB, body io.Reader) (league []Player) {
 }
 
 // Requests
+func newGetScoreRequest(name string) *http.Request {
+	req, _ := http.NewRequest(http.MethodGet, fmt.Sprintf("/players/%s", name), nil)
+	return req
+}
+
 func newLeagueRequest() *http.Request {
 	req, _ := http.NewRequest(http.MethodGet, "/league", nil)
 	return req
