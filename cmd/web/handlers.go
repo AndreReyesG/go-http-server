@@ -4,7 +4,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
-	"strings"
 )
 
 const jsonContentType = "application/json"
@@ -25,7 +24,7 @@ func (p *PlayerServer) showScore(w http.ResponseWriter, r *http.Request) {
 }
 
 func (p *PlayerServer) processWin(w http.ResponseWriter, r *http.Request) {
-	player := strings.TrimPrefix(r.URL.Path, "/players/")
+	player := r.PathValue("player")
 	p.store.RecordWin(player)
 	w.WriteHeader(http.StatusAccepted)
 }
