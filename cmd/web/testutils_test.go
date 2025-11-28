@@ -6,28 +6,10 @@ import (
 	"io"
 	"net/http"
 	"net/http/httptest"
-	"reflect"
 	"testing"
+
+	"poker/internal/data"
 )
-
-type StubPlayerStore struct {
-	scores   map[string]int
-	winCalls []string
-	league   []Player
-}
-
-func (s *StubPlayerStore) GetPlayerScore(name string) int {
-	score := s.scores[name]
-	return score
-}
-
-func (s *StubPlayerStore) RecordWin(name string) {
-	s.winCalls = append(s.winCalls, name)
-}
-
-func (s *StubPlayerStore) GetLeague() League {
-	return s.league
-}
 
 // Define a custom testServer type which embeds an httptest.Server instance.
 type testServer struct {
@@ -75,10 +57,10 @@ func (ts *testServer) recordWin(t *testing.T, name string) int {
 	return res.StatusCode
 }
 
-func getLeagueFromResponse(t testing.TB, body io.Reader) (league []Player) {
+func getLeagueFromResponse(t testing.TB, body io.Reader) (league []data.Player) {
 	t.Helper()
 
-	league, err := NewLeague(body)
+	league, err := data.NewLeague(body)
 	if err != nil {
 		t.Fatalf("Unable to parse response from server %q into slice of Player, '%v'",
 			body, err)
@@ -101,33 +83,4 @@ func newLeagueRequest() *http.Request {
 func newPostWinRequest(name string) *http.Request {
 	req, _ := http.NewRequest(http.MethodPost, fmt.Sprintf("/players/%s", name), nil)
 	return req
-}
-
-// Assertions
-func assertResponseBody(t testing.TB, got, want string) {
-	t.Helper()
-	if got != want {
-		t.Errorf("response body is wrong, got: %q; want: %q", got, want)
-	}
-}
-
-func assertStatus(t testing.TB, got, want int) {
-	t.Helper()
-	if got != want {
-		t.Errorf("did not get correct status, got: %d, want: %d", got, want)
-	}
-}
-
-func assertLeague(t testing.TB, got, want []Player) {
-	t.Helper()
-	if !reflect.DeepEqual(got, want) {
-		t.Errorf("got: %v; want: %v", got, want)
-	}
-}
-
-func assertContentType(t testing.TB, response *httptest.ResponseRecorder, want string) {
-	t.Helper()
-	if response.Result().Header.Get("content-type") != want {
-		t.Errorf("response did not have content-type of application/json, got %v", response.Result().Header)
-	}
 }

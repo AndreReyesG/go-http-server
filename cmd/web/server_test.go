@@ -4,10 +4,13 @@ import (
 	"net/http"
 	"net/http/httptest"
 	"testing"
+
+	"poker/internal/data"
+	"poker/internal/testutils"
 )
 
 func TestGETPlayers(t *testing.T) {
-	store := StubPlayerStore{
+	store := testutils.StubPlayerStore{
 		map[string]int{
 			"Moka":  20,
 			"Milky": 10,
@@ -51,14 +54,14 @@ func TestGETPlayers(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			statusCode, body := server.getPlayerScore(t, tt.player)
 
-			assertStatus(t, statusCode, tt.expectedHTTPStatus)
-			assertResponseBody(t, body, tt.expectedScore)
+			testutils.AssertStatus(t, statusCode, tt.expectedHTTPStatus)
+			testutils.AssertResponseBody(t, body, tt.expectedScore)
 		})
 	}
 }
 
 func TestStoreWins(t *testing.T) {
-	store := StubPlayerStore{
+	store := testutils.StubPlayerStore{
 		map[string]int{},
 		nil,
 		nil,
@@ -70,27 +73,27 @@ func TestStoreWins(t *testing.T) {
 		player := "Moka"
 
 		statusCode := server.recordWin(t, player)
-		assertStatus(t, statusCode, http.StatusAccepted)
+		testutils.AssertStatus(t, statusCode, http.StatusAccepted)
 
-		if len(store.winCalls) != 1 {
-			t.Errorf("got %d calls to RecordWin; want 1", len(store.winCalls))
+		if len(store.WinCalls) != 1 {
+			t.Errorf("got %d calls to RecordWin; want 1", len(store.WinCalls))
 		}
 
-		if store.winCalls[0] != player {
+		if store.WinCalls[0] != player {
 			t.Errorf("did not store correct winner; got: %q; want: %q",
-				store.winCalls[0], player)
+				store.WinCalls[0], player)
 		}
 	})
 }
 
 func TestLeague(t *testing.T) {
 	t.Run("it returns the league table as JSON", func(t *testing.T) {
-		wantedLeague := []Player{
+		wantedLeague := []data.Player{
 			{"Milky", 32},
 			{"Moka", 12},
 			{"Benito", 94},
 		}
-		store := StubPlayerStore{nil, nil, wantedLeague}
+		store := testutils.StubPlayerStore{nil, nil, wantedLeague}
 		server := NewPlayerServer(&store)
 
 		request := newLeagueRequest()
@@ -99,8 +102,8 @@ func TestLeague(t *testing.T) {
 		server.ServeHTTP(response, request)
 
 		got := getLeagueFromResponse(t, response.Body)
-		assertStatus(t, response.Code, http.StatusOK)
-		assertLeague(t, got, wantedLeague)
-		assertContentType(t, response, jsonContentType)
+		testutils.AssertStatus(t, response.Code, http.StatusOK)
+		testutils.AssertLeague(t, got, wantedLeague)
+		testutils.AssertContentType(t, response, jsonContentType)
 	})
 }

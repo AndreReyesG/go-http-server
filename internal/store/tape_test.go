@@ -1,12 +1,14 @@
-package main
+package store
 
 import (
 	"io"
 	"testing"
+
+	"poker/internal/testutils"
 )
 
 func TestTape_Write(t *testing.T) {
-	file, clean := createTempFile(t, "12345")
+	file, clean := testutils.CreateTempFile(t, "12345")
 	defer clean()
 
 	tape := &tape{file}

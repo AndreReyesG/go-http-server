@@ -4,6 +4,8 @@ import (
 	"log"
 	"net/http"
 	"os"
+
+	"poker/internal/store"
 )
 
 const dbFileName = "game.db.json"
@@ -14,7 +16,7 @@ func main() {
 		log.Fatalf("problem opening %s %v", dbFileName, err)
 	}
 
-	store, err := NewFileSystemPlayerStore(db)
+	store, err := store.NewFileSystemPlayerStore(db)
 	if err != nil {
 		log.Fatalf("problem creating the file system player store, %v", err)
 	}

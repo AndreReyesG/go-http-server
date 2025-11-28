@@ -4,16 +4,20 @@ import (
 	"net/http"
 	"net/http/httptest"
 	"testing"
+
+	"poker/internal/data"
+	"poker/internal/store"
+	"poker/internal/testutils"
 )
 
 func TestRecordingWinsAndRetrievingThem(t *testing.T) {
-	database, cleanDatabase := createTempFile(t, "[]")
+	database, cleanDatabase := testutils.CreateTempFile(t, "[]")
 	defer cleanDatabase()
-	store, err := NewFileSystemPlayerStore(database)
+	playerStore, err := store.NewFileSystemPlayerStore(database)
 
-	assertNoError(t, err)
+	testutils.AssertNoError(t, err)
 
-	server := NewPlayerServer(store)
+	server := NewPlayerServer(playerStore)
 	player := "Moka"
 
 	server.ServeHTTP(httptest.NewRecorder(), newPostWinRequest(player))
@@ -23,20 +27,20 @@ func TestRecordingWinsAndRetrievingThem(t *testing.T) {
 	t.Run("get score", func(t *testing.T) {
 		response := httptest.NewRecorder()
 		server.ServeHTTP(response, newGetScoreRequest(player))
-		assertStatus(t, response.Code, http.StatusOK)
+		testutils.AssertStatus(t, response.Code, http.StatusOK)
 
-		assertResponseBody(t, response.Body.String(), "3")
+		testutils.AssertResponseBody(t, response.Body.String(), "3")
 	})
 
 	t.Run("get league", func(t *testing.T) {
 		response := httptest.NewRecorder()
 		server.ServeHTTP(response, newLeagueRequest())
-		assertStatus(t, response.Code, http.StatusOK)
+		testutils.AssertStatus(t, response.Code, http.StatusOK)
 
 		got := getLeagueFromResponse(t, response.Body)
-		want := []Player{
+		want := []data.Player{
 			{"Moka", 3},
 		}
-		assertLeague(t, got, want)
+		testutils.AssertLeague(t, got, want)
 	})
 }
