@@ -24,6 +24,6 @@ func main() {
 		log.Fatalf("problem creating the file system player store, %v", err)
 	}
 
-	game := CLI{store, os.Stdin}
+	game := NewCLI(store, os.Stdin)
 	game.PlayPoker()
 }
