@@ -15,20 +15,24 @@ type FileSystemPlayerStore struct {
 	league   data.League
 }
 
-func initialisePlayerDBFile(file *os.File) error {
-	file.Seek(0, io.SeekStart)
-
-	info, err := file.Stat()
+// FileSystemPlayerStoreFromFile() encapsulte opening a file from a path and
+// returning FileSystemPlayerStore
+func FileSystemPlayerStoreFromFile(path string) (*FileSystemPlayerStore, func(), error) {
+	db, err := os.OpenFile(path, os.O_RDWR|os.O_CREATE, 0666)
 	if err != nil {
-		return fmt.Errorf("problem getting file info from file %s, %v", file.Name(), err)
+		return nil, nil, fmt.Errorf("problem opening %s, %v", path, err)
 	}
 
-	if info.Size() == 0 {
-		file.Write([]byte("[]"))
-		file.Seek(0, io.SeekStart)
+	closeFunc := func() {
+		db.Close()
 	}
 
-	return nil
+	store, err := NewFileSystemPlayerStore(db)
+	if err != nil {
+		return nil, nil, fmt.Errorf("problem creating the file system player store, %v", err)
+	}
+
+	return store, closeFunc, nil
 }
 
 func NewFileSystemPlayerStore(file *os.File) (*FileSystemPlayerStore, error) {
@@ -46,6 +50,22 @@ func NewFileSystemPlayerStore(file *os.File) (*FileSystemPlayerStore, error) {
 		database: json.NewEncoder(&tape{file}),
 		league:   league,
 	}, nil
+}
+
+func initialisePlayerDBFile(file *os.File) error {
+	file.Seek(0, io.SeekStart)
+
+	info, err := file.Stat()
+	if err != nil {
+		return fmt.Errorf("problem getting file info from file %s, %v", file.Name(), err)
+	}
+
+	if info.Size() == 0 {
+		file.Write([]byte("[]"))
+		file.Seek(0, io.SeekStart)
+	}
+
+	return nil
 }
 
 func (f *FileSystemPlayerStore) GetLeague() data.League {
