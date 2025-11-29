@@ -74,15 +74,7 @@ func TestStoreWins(t *testing.T) {
 
 		statusCode := server.recordWin(t, player)
 		testutils.AssertStatus(t, statusCode, http.StatusAccepted)
-
-		if len(store.WinCalls) != 1 {
-			t.Errorf("got %d calls to RecordWin; want 1", len(store.WinCalls))
-		}
-
-		if store.WinCalls[0] != player {
-			t.Errorf("did not store correct winner; got: %q; want: %q",
-				store.WinCalls[0], player)
-		}
+		testutils.AssertPlayerWin(t, &store, player)
 	})
 }
 

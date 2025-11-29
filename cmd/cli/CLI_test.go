@@ -1,17 +1,18 @@
 package main
 
 import (
+	"strings"
 	"testing"
 
 	"poker/internal/testutils"
 )
 
 func TestCLI(t *testing.T) {
+	in := strings.NewReader("Moka wins\n")
 	playerStore := &testutils.StubPlayerStore{}
-	cli := &CLI{playerStore}
+
+	cli := &CLI{playerStore, in}
 	cli.PlayPoker()
 
-	if len(playerStore.WinCalls) != 1 {
-		t.Fatal("expected a win call but didn't get any")
-	}
+	testutils.AssertPlayerWin(t, playerStore, "Moka")
 }
