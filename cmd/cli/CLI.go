@@ -9,10 +9,6 @@ import (
 	"poker/internal/data"
 )
 
-type BlindAlerter interface {
-	ScheduleAlertAt(duration time.Duration, amount int)
-}
-
 type CLI struct {
 	store   data.PlayerStore
 	in      *bufio.Scanner
