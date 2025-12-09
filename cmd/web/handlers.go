@@ -3,6 +3,7 @@ package main
 import (
 	"encoding/json"
 	"fmt"
+	"html/template"
 	"net/http"
 )
 
@@ -30,5 +31,10 @@ func (p *PlayerServer) processWin(w http.ResponseWriter, r *http.Request) {
 }
 
 func (p *PlayerServer) game(w http.ResponseWriter, r *http.Request) {
-	w.WriteHeader(http.StatusOK)
+	tmpl, err := template.ParseFiles("game.html")
+	if err != nil {
+		http.Error(w, fmt.Sprintf("problem loading template %s", err.Error()), http.StatusInternalServerError)
+		return
+	}
+	tmpl.Execute(w, nil)
 }
