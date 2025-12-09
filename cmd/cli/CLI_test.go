@@ -18,7 +18,8 @@ type GameSpy struct {
 	StartCalled bool
 	StartedWith int
 
-	FinishedWith string
+	FinishedCalled bool
+	FinishedWith   string
 }
 
 func (g *GameSpy) Start(numberOfPlayers int) {
@@ -27,6 +28,7 @@ func (g *GameSpy) Start(numberOfPlayers int) {
 }
 
 func (g *GameSpy) Finish(winner string) {
+	g.FinishedCalled = true
 	g.FinishedWith = winner
 }
 
@@ -70,6 +72,18 @@ func TestCLI(t *testing.T) {
 		assertGameNotStarted(t, game)
 		assertMessagesSentToUser(t, stdout, PlayerPrompt, BadPlayerInputErrMsg)
 	})
+
+	t.Run("it prints an error when the winner is declared incorrectly", func(t *testing.T) {
+		in := userSends("5", "Moka is a cat")
+		stdout := &bytes.Buffer{}
+		game := &GameSpy{}
+
+		cli := NewCLI(in, stdout, game)
+		cli.PlayPoker()
+
+		assertGameNotFinished(t, game)
+		assertMessagesSentToUser(t, stdout, PlayerPrompt, BadWinnerInputErrMsg)
+	})
 }
 
 func assertMessagesSentToUser(t testing.TB, stdout *bytes.Buffer, messages ...string) {
@@ -99,5 +113,12 @@ func assertGameNotStarted(t testing.TB, game *GameSpy) {
 	t.Helper()
 	if game.StartCalled {
 		t.Error("game should not have started")
+	}
+}
+
+func assertGameNotFinished(t testing.TB, game *GameSpy) {
+	t.Helper()
+	if game.FinishedCalled {
+		t.Error("game should not have finished")
 	}
 }
