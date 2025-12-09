@@ -21,6 +21,7 @@ func NewPlayerServer(store data.PlayerStore) *PlayerServer {
 	router.Handle("GET /league", http.HandlerFunc(p.leagueHandler))
 	router.Handle("GET /players/{player}", http.HandlerFunc(p.showScore))
 	router.Handle("POST /players/{player}", http.HandlerFunc(p.processWin))
+	router.Handle("GET /game", http.HandlerFunc(p.game))
 
 	p.Handler = router
 

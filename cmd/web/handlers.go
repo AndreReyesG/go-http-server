@@ -28,3 +28,7 @@ func (p *PlayerServer) processWin(w http.ResponseWriter, r *http.Request) {
 	p.store.RecordWin(player)
 	w.WriteHeader(http.StatusAccepted)
 }
+
+func (p *PlayerServer) game(w http.ResponseWriter, r *http.Request) {
+	w.WriteHeader(http.StatusOK)
+}
