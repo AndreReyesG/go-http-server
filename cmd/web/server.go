@@ -23,6 +23,8 @@ func NewPlayerServer(store data.PlayerStore) *PlayerServer {
 	router.Handle("POST /players/{player}", http.HandlerFunc(p.processWin))
 	router.Handle("GET /game", http.HandlerFunc(p.game))
 
+	router.Handle("/ws", http.HandlerFunc(p.webSocket))
+
 	p.Handler = router
 
 	return p
