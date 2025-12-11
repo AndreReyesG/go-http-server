@@ -134,6 +134,7 @@ func TestGame(t *testing.T) {
 			t.Fatalf("could not send message over ws connection %v", err)
 		}
 
+		// NOTE: Puttting arbitary sleeps into tests is very bad practice.
 		time.Sleep(10 * time.Millisecond)
 		testutils.AssertPlayerWin(t, store, winner)
 	})
