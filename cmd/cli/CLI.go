@@ -7,15 +7,17 @@ import (
 	"io"
 	"strconv"
 	"strings"
+
+	"poker/internal/game"
 )
 
 type CLI struct {
 	in   *bufio.Scanner
 	out  io.Writer
-	game Game
+	game game.Game
 }
 
-func NewCLI(in io.Reader, out io.Writer, game Game) *CLI {
+func NewCLI(in io.Reader, out io.Writer, game game.Game) *CLI {
 	return &CLI{
 		in:   bufio.NewScanner(in),
 		out:  out,
