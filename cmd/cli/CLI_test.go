@@ -9,11 +9,6 @@ import (
 	"poker/internal/testutils"
 )
 
-var dummyBlindAlerter = &SpyBlindAlerter{}
-var dummyPlayerStore = &testutils.StubPlayerStore{}
-var dummyStdIn = &bytes.Buffer{}
-var dummyStdOut = &bytes.Buffer{}
-
 type GameSpy struct {
 	StartCalled bool
 	StartedWith int
@@ -54,7 +49,7 @@ func TestCLI(t *testing.T) {
 		in := userSends("9", "Milky wins")
 		game := &GameSpy{}
 
-		cli := NewCLI(in, dummyStdOut, game)
+		cli := NewCLI(in, testutils.DummyStdOut, game)
 		cli.PlayPoker()
 
 		assertGameStartedWith(t, game, 9)
