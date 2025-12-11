@@ -1,6 +1,7 @@
 package testutils
 
 import (
+	"bytes"
 	"net/http/httptest"
 	"os"
 	"reflect"
@@ -8,6 +9,10 @@ import (
 
 	"poker/internal/data"
 )
+
+var DummyPlayerStore = &StubPlayerStore{}
+var DummyStdIn = &bytes.Buffer{}
+var DummyStdOut = &bytes.Buffer{}
 
 type StubPlayerStore struct {
 	Scores   map[string]int
