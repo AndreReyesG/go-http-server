@@ -16,7 +16,10 @@ func main() {
 	}
 	defer close()
 
-	server := NewPlayerServer(store)
+	server, err := NewPlayerServer(store)
+	if err != nil {
+		log.Fatalf("problem creating player server %v", err)
+	}
 
 	log.Print("starting server on :5000")
 
