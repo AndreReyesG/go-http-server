@@ -13,6 +13,14 @@ import (
 	"github.com/gorilla/websocket"
 )
 
+func mustMakePlayerServer(t *testing.T, store data.PlayerStore) *PlayerServer {
+	server, err := NewPlayerServer(store)
+	if err != nil {
+		t.Fatalf("problem creating player server, %v", err)
+	}
+	return server
+}
+
 func TestGETPlayers(t *testing.T) {
 	store := testutils.StubPlayerStore{
 		map[string]int{
@@ -22,7 +30,7 @@ func TestGETPlayers(t *testing.T) {
 		nil,
 		nil,
 	}
-	server := newTestServer(t, NewPlayerServer(&store))
+	server := newTestServer(t, mustMakePlayerServer(t, &store))
 	defer server.Close()
 
 	// Create a slice of anonymous structs containing the test case name,
@@ -70,7 +78,7 @@ func TestStoreWins(t *testing.T) {
 		nil,
 		nil,
 	}
-	server := newTestServer(t, NewPlayerServer(&store))
+	server := newTestServer(t, mustMakePlayerServer(t, &store))
 	defer server.Close()
 
 	t.Run("it records wins on POST", func(t *testing.T) {
@@ -90,7 +98,7 @@ func TestLeague(t *testing.T) {
 			{"Benito", 94},
 		}
 		store := testutils.StubPlayerStore{nil, nil, wantedLeague}
-		server := NewPlayerServer(&store)
+		server := mustMakePlayerServer(t, &store)
 
 		request := newLeagueRequest()
 		response := httptest.NewRecorder()
@@ -106,7 +114,7 @@ func TestLeague(t *testing.T) {
 
 func TestGame(t *testing.T) {
 	t.Run("GET /game returns 200", func(t *testing.T) {
-		server := NewPlayerServer(&testutils.StubPlayerStore{})
+		server := mustMakePlayerServer(t, &testutils.StubPlayerStore{})
 
 		request, _ := http.NewRequest(http.MethodGet, "/game", nil)
 		response := httptest.NewRecorder()
@@ -119,7 +127,7 @@ func TestGame(t *testing.T) {
 	t.Run("when we get a message over a websocket it is a winner of a game", func(t *testing.T) {
 		store := &testutils.StubPlayerStore{}
 		winner := "Moka"
-		server := httptest.NewServer(NewPlayerServer(store))
+		server := httptest.NewServer(mustMakePlayerServer(t, store))
 		defer server.Close()
 
 		wsURL := "ws" + strings.TrimPrefix(server.URL, "http") + "/ws"

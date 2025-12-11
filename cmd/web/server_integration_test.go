@@ -17,7 +17,7 @@ func TestRecordingWinsAndRetrievingThem(t *testing.T) {
 
 	testutils.AssertNoError(t, err)
 
-	server := NewPlayerServer(playerStore)
+	server := mustMakePlayerServer(t, playerStore)
 	player := "Moka"
 
 	server.ServeHTTP(httptest.NewRecorder(), newPostWinRequest(player))
